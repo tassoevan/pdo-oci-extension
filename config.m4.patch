@@ -1,0 +1,26 @@
+*** config.m4   2005-09-24 17:23:24.000000000 -0600
+--- /tmp/pear/download/PDO_OCI-1.0/config.m4  2009-07-07 17:32:14.000000000 -0600
+***************
+*** 7,12 ****
+--- 7,14 ----
+    if test -s "$PDO_OCI_DIR/orainst/unix.rgs"; then
+      PDO_OCI_VERSION=`grep '"ocommon"' $PDO_OCI_DIR/orainst/unix.rgs | sed 's/[ ][ ]*/:/g' | cut -d: -f 6 | cut -c 2-4`
+      test -z "$PDO_OCI_VERSION" && PDO_OCI_VERSION=7.3
++   elif test -f $PDO_OCI_DIR/lib/libclntsh.$SHLIB_SUFFIX_NAME.11.1; then
++     PDO_OCI_VERSION=11.1    
+    elif test -f $PDO_OCI_DIR/lib/libclntsh.$SHLIB_SUFFIX_NAME.10.1; then
+      PDO_OCI_VERSION=10.1    
+    elif test -f $PDO_OCI_DIR/lib/libclntsh.$SHLIB_SUFFIX_NAME.9.0; then
+***************
+*** 119,124 ****
+--- 121,129 ----
+      10.2)
+        PHP_ADD_LIBRARY(clntsh, 1, PDO_OCI_SHARED_LIBADD)
+        ;;
++     11.1)
++       PHP_ADD_LIBRARY(clntsh, 1, PDO_OCI_SHARED_LIBADD)
++       ;;
+      *)
+        AC_MSG_ERROR(Unsupported Oracle version! $PDO_OCI_VERSION)
+        ;;
+#EOF

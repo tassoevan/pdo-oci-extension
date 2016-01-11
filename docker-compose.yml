@@ -1,0 +1,3 @@
+pdo_oci_compiler:
+    build: .
+    user: $USER
