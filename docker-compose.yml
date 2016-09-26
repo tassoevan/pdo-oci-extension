@@ -6,9 +6,13 @@ services:
       - "49160:22"
   precise:
     build: precise/
+    volumes:
+      - .:/host
     depends_on:
       - database
   trusty:
     build: trusty/
+    volumes:
+      - .:/host
     depends_on:
       - database
