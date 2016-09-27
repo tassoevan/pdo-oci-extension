@@ -5,7 +5,7 @@ MAINTAINER Tasso Evangelista <tasso@tassoevan.me>
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update && \
-    apt-get install -y wget unzip php5 php5-cli php5-dev php-db php-pear build-essential libaio1 re2c && \
+    apt-get install -y unzip php5 php5-cli php5-dev php-db php-pear build-essential libaio1 re2c && \
     ln -s /usr/include/php5 /usr/include/php
 
 # Install Oracle Instant Client Basic and SDK
