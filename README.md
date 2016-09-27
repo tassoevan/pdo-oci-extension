@@ -1,52 +1,92 @@
-# The motherf*cking way the get Oracle database connections in PHP5 over Ubuntu
+# The motherf*cking way the get Oracle database connections in PHP5 over Ubuntu, revisited
 
 Special thanks to:
-  
-* [AJ ONeal](https://twitter.com/coolaj86)
-* [Hsiao Siyuan](http://hsiaosiyuan.com/wp/)
 
-## First step: Install the Oracle Client
+* AJ ONeal
+* Hsiao Siyuan
 
-1. Download Instant Client from http://www.oracle.com/technetwork/database/features/instant-client/ (you must be registered in Oracle; it's free). You'll need `instantclient-basic-*-*.zip` and `instantclient-sdk-*-*.zip`  files.
-2. Execute the following commands in your terminal:
+## Before anything
 
-    ```sh
-    $ sudo su -  
-    $ mkdir -p /opt/oracle/instantclient
-    $ cd /opt/oracle/instantclient
-    ```
+### Taking risks
 
-3. Copy downloaded files into `/opt/oracle/instantclient`.
-4. Unzip files executing these commands:
+Long time I didn't write PHP aplications that connect to Oracle databases, implying that I'm not aware of any issues
+related to this procedure. You are invited to contribute with your reports and workarounds (some of them are commented
+[here](https://gist.github.com/tassoevan/10392954) and I'll do a review ASAP).
 
-    ```sh
-    $ unzip instantclient-basic-*-*.zip
-    $ unzip instantclient-sdk-*-*.zip
-    ```
+Alongside these things, you should consider the fact you are dealing with an experimental extension. It's strongly
+inadvisable use it at production environment. I recommend you to see the awesome
+[taq/pdooci](https://github.com/taq/pdooci).
 
-5. Move all `/opt/oracle/instantclient/instantclient` content to `/opt/oracle/instantclient`:
+### Ubuntu and Docker
 
-    ```sh
-    $ mv instantclient*/* ./
-    $ rmdir instantclient*/
-    ```
+Ubuntu versions tested are 12.04 (Precise) and 14.04 (Trusty). All commands that should be performed in terminal are
+describe inside the `precise/Dockerfile` and `trusty/Dockerfile` files. [Docker](https://www.docker.com/) serves to the
+purpouse of testing procedures of compiling and install in an isolated environment. You can export the compiled
+extension files and even the Instant Client directory using a container mount point, though.
 
-6. During extension compiling, some errors will arise when linking with some libraries. To avoid them, do:
+### Download Oracle Instant Client, manually
 
-    ```sh
-    $ ln -s libclntsh.so.* libclntsh.so
-    $ ln -s libocci.so.* libocci.so
-    $ echo /opt/oracle/instantclient >> /etc/ld.so.conf
-    $ ldconfig
-    ```
+Unfortunatelly, the [Oracle Instant Client](http://www.oracle.com/technetwork/database/features/instant-client/)
+download can't be automated due license terms. That means you must be registered in Oracle (it's free) and get the ZIP
+files by yourself. They are `instantclient-basic-linux.x64-12.1.0.2.0.zip` and
+`instantclient-sdk-linux.x64-12.1.0.2.0.zip`, and should be placed inside `precise/instantclient` and
+`trusty/instantclient`.
 
-7. Create a folder for your network configuration files:
-    ```sh
-    $ mkdir -p network/admin
-    ```
-8. Place `sqlnet.ora` and `tnsnames.ora` files in `/opt/oracle/instantclient/network/admin`.
+## 1st step: Install build tools and dependencies
 
-Now you have the basic connection kit for connections and SDK for compiling PHP extensions.
+You'll need `unzip`, PHP itself and some essentials to compile C programs:
+
+```sh
+apt-get install -y unzip php5 php5-cli php5-dev php-db php-pear build-essential libaio1 re2c
+```
+
+Extensions makefiles will try to include *.h files from `/usr/include/php`, a inexistent directory. However,
+`/usr/include/php5` contains all relevant files to compiling, so we'll link it:
+
+```sh
+ln -s /usr/include/php5 /usr/include/php
+```
+
+## 2nd step: Unzip Instant Client
+
+`/opt/oracle/instantclient` is the right directory for the job of containing Instant Client files.
+
+```sh
+mkdir -p /opt/oracle/instantclient
+```
+
+Unzip basic files into `/opt/oracle`
+
+```sh
+unzip instantclient-basic-linux.x64-12.1.0.2.0.zip -d /opt/oracle
+```
+
+It'll create `/opt/oracle/instantclient_12_1` directory, that should be renamed as the lib directory:
+
+```sh
+mv /opt/oracle/instantclient_12_1 /opt/oracle/instantclient/lib
+```
+
+Same goes for SDK files:
+
+```sh
+unzip instantclient-sdk-linux.x64-12.1.0.2.0.zip -d /opt/oracle
+mv /opt/oracle/instantclient_12_1/sdk/include /opt/oracle/instantclient/include
+```
+
+Some libraries have an irrelevant version number that can be safely ignored:
+
+```sh
+ln -s /opt/oracle/instantclient/lib/libclntsh.so.12.1 /opt/oracle/instantclient/lib/libclntsh.so
+ln -s /opt/oracle/instantclient/lib/libocci.so.12.1 /opt/oracle/instantclient/lib/libocci.so
+```
+
+The Oracle lib directory must be accessible anywhere:
+
+```sh
+echo /opt/oracle/instantclient/lib >> /etc/ld.so.conf
+ldconfig
+```
 
 ## Second step: Install the OCI8 PHP Extension
 
@@ -106,14 +146,14 @@ The `pdo_oci` library is outdated, so its install is more tricky.
     $ cd /tmp/pear/download/
     $ pecl download pdo_oci
     ```
-    
+
 3. Extract source:
 
     ```sh
     $ tar xvf PDO_OCI*.tgz
     $ cd PDO_OCI*
     ```
-    
+
 4. Create a file named `config.m4.patch`:
 
     ```
@@ -126,9 +166,9 @@ The `pdo_oci` library is outdated, so its install is more tricky.
           PDO_OCI_VERSION=`grep '"ocommon"' $PDO_OCI_DIR/orainst/unix.rgs | sed 's/[ ][ ]*/:/g' | cut -d: -f 6 | cut -c 2-4`
           test -z "$PDO_OCI_VERSION" && PDO_OCI_VERSION=7.3
     +   elif test -f $PDO_OCI_DIR/lib/libclntsh.$SHLIB_SUFFIX_NAME.11.1; then
-    +     PDO_OCI_VERSION=11.1    
+    +     PDO_OCI_VERSION=11.1
         elif test -f $PDO_OCI_DIR/lib/libclntsh.$SHLIB_SUFFIX_NAME.10.1; then
-          PDO_OCI_VERSION=10.1    
+          PDO_OCI_VERSION=10.1
         elif test -f $PDO_OCI_DIR/lib/libclntsh.$SHLIB_SUFFIX_NAME.9.0; then
     ***************
     *** 119,124 ****
@@ -144,7 +184,7 @@ The `pdo_oci` library is outdated, so its install is more tricky.
             ;;
     #EOF
     ```
-    
+
 5. Apply patch:
 
     ``` sh
@@ -171,5 +211,5 @@ The `pdo_oci` library is outdated, so its install is more tricky.
     ```sh
     $ php5enmod pdo_oci
     ```
-    
+
 And now you can take a cup of coffee.
