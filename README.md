@@ -93,7 +93,7 @@ $ ldconfig
 You need to download the ancient extension with the elderly [PECL](https://pecl.php.net/).
 
 ```sh
-$ pecl install oci8-1.4.10
+$ pecl install oci8-2.0.12
 ```
 
 When prompted for Instant Client path, just type `instantclient,/opt/oracle/instantclient/lib`.

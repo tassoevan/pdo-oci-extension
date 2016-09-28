@@ -23,7 +23,7 @@ RUN mkdir -p /opt/oracle/instantclient && \
     ldconfig
 
 # Install PHP OCI8 extension
-RUN echo 'instantclient,/opt/oracle/instantclient/lib' | pecl install oci8-1.4.10
+RUN echo 'instantclient,/opt/oracle/instantclient/lib' | pecl install oci8-2.0.12
 ADD oci8.ini /etc/php5/mods-available/oci8.ini
 RUN ln -s ../../mods-available/oci8.ini /etc/php5/cli/conf.d/20-oci8.ini
 ADD oci8-test.php /tmp/oci8-test.php
