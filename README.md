@@ -88,7 +88,7 @@ $ echo /opt/oracle/instantclient/lib >> /etc/ld.so.conf
 $ ldconfig
 ```
 
-## 3rd step: Install the OCI8 PHP Extension
+## 3. Install the OCI8 PHP Extension
 
 You need to download the ancient extension with the elderly [PECL](https://pecl.php.net/).
 
