@@ -26,8 +26,6 @@ RUN mkdir -p /opt/oracle/instantclient && \
 RUN echo 'instantclient,/opt/oracle/instantclient/lib' | pecl install oci8-1.4.10
 ADD oci8.ini /etc/php5/mods-available/oci8.ini
 RUN ln -s ../../mods-available/oci8.ini /etc/php5/cli/conf.d/20-oci8.ini
-RUN ls -la /etc/php5/cli/conf.d
-RUN ls -la /etc/php5/mods-available
 ADD oci8-test.php /tmp/oci8-test.php
 RUN php /tmp/oci8-test.php
 
