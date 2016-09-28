@@ -32,184 +32,174 @@ files by yourself. They are `instantclient-basic-linux.x64-12.1.0.2.0.zip` and
 `instantclient-sdk-linux.x64-12.1.0.2.0.zip`, and should be placed inside `precise/instantclient` and
 `trusty/instantclient`.
 
-## 1st step: Install build tools and dependencies
+## 1. Install build tools and dependencies
 
 You'll need `unzip`, PHP itself and some essentials to compile C programs:
 
 ```sh
-apt-get install -y unzip php5 php5-cli php5-dev php-db php-pear build-essential libaio1 re2c
+$ apt-get install -y unzip php5 php5-cli php5-dev php-db php-pear build-essential libaio1 re2c
 ```
 
 Extensions makefiles will try to include *.h files from `/usr/include/php`, a inexistent directory. However,
 `/usr/include/php5` contains all relevant files to compiling, so we'll link it:
 
 ```sh
-ln -s /usr/include/php5 /usr/include/php
+$ ln -s /usr/include/php5 /usr/include/php
 ```
 
-## 2nd step: Unzip Instant Client
+## 2. Unzip Instant Client
 
 `/opt/oracle/instantclient` is the right directory for the job of containing Instant Client files.
 
 ```sh
-mkdir -p /opt/oracle/instantclient
+$ mkdir -p /opt/oracle/instantclient
 ```
 
 Unzip basic files into `/opt/oracle`
 
 ```sh
-unzip instantclient-basic-linux.x64-12.1.0.2.0.zip -d /opt/oracle
+$ unzip instantclient-basic-linux.x64-12.1.0.2.0.zip -d /opt/oracle
 ```
 
-It'll create `/opt/oracle/instantclient_12_1` directory, that should be renamed as the lib directory:
+It'll create `/opt/oracle/instantclient_12_1` directory, that should be renamed as libraries directory:
 
 ```sh
-mv /opt/oracle/instantclient_12_1 /opt/oracle/instantclient/lib
+$ mv /opt/oracle/instantclient_12_1 /opt/oracle/instantclient/lib
 ```
 
 Same goes for SDK files:
 
 ```sh
-unzip instantclient-sdk-linux.x64-12.1.0.2.0.zip -d /opt/oracle
-mv /opt/oracle/instantclient_12_1/sdk/include /opt/oracle/instantclient/include
+$ unzip instantclient-sdk-linux.x64-12.1.0.2.0.zip -d /opt/oracle
+$ mv /opt/oracle/instantclient_12_1/sdk/include /opt/oracle/instantclient/include
 ```
 
 Some libraries have an irrelevant version number that can be safely ignored:
 
 ```sh
-ln -s /opt/oracle/instantclient/lib/libclntsh.so.12.1 /opt/oracle/instantclient/lib/libclntsh.so
-ln -s /opt/oracle/instantclient/lib/libocci.so.12.1 /opt/oracle/instantclient/lib/libocci.so
+$ ln -s /opt/oracle/instantclient/lib/libclntsh.so.12.1 /opt/oracle/instantclient/lib/libclntsh.so
+$ ln -s /opt/oracle/instantclient/lib/libocci.so.12.1 /opt/oracle/instantclient/lib/libocci.so
 ```
 
-The Oracle lib directory must be accessible anywhere:
+The Oracle libraries directory must be accessible anywhere:
 
 ```sh
-echo /opt/oracle/instantclient/lib >> /etc/ld.so.conf
-ldconfig
+$ echo /opt/oracle/instantclient/lib >> /etc/ld.so.conf
+$ ldconfig
 ```
 
-## Second step: Install the OCI8 PHP Extension
+## 3rd step: Install the OCI8 PHP Extension
 
-1. Get all essential packages for download and compiling from PEAR repositories:
+You need to download the ancient extension with the elderly [PECL](https://pecl.php.net/).
 
-    ```sh
-    $ apt-get install --yes php5 php5-cli php5-dev php-db php-pear
-    $ apt-get install --yes build-essential libaio1
-    ```
+```sh
+$ pecl install oci8-1.4.10
+```
 
-2. Request OCI8 install:
+When prompted for Instant Client path, just type `instantclient,/opt/oracle/instantclient/lib`.
 
-    ```sh
-    $ pecl install oci8
-    ```
-    Type `instantclient,/opt/oracle/instantclient` when prompted for Instant Client path.
+Now we should activate OCI8, differences between PHP versions in Ubuntu distros start to get in the way though.
 
-3. Save this text in `/etc/php5/mods-available/oci8.ini`:
+* Ubuntu 12.04 (Precise) / PHP 5.3.10:
 
-    ``` ini
+    Create file `/etc/php5/conf.d/oci8.ini` containing just one line:
+
+    ```ini
     extension=oci8.so
     ```
 
-4. Activate extension:
+* Ubuntu 14.04 (Trusty) / PHP 5.5.9:
 
-    ```sh
-    $ php5enmod oci8
+    Create file `/etc/php5/mods-available/oci8.ini` containing just one line:
+
+    ```ini
+    extension=oci8.so
     ```
 
-Now you have all `oci_*` functions available for PHP in both php-cli and Apache.
+    Link it to activate on PHP CLI (command line interface):
 
-## Third step: Install the PDO/OCI PHP Extension
+    ```sh
+    $ ln -s ../../mods-available/oci8.ini /etc/php5/cli/conf.d/20-oci8.ini
+    ```
+
+    If you have an Apache setup:
+
+    ```sh
+    $ ln -s ../../mods-available/oci8.ini /etc/php5/apache2/conf.d/20-oci8.ini
+    ```
+
+Now you have all `oci_*` functions available for PHP in both php-cli and Apache. Confirm it using this script:
+
+```php
+<?php
+echo function_exists('oci_connect') ? 'OCI8 active' : 'OCI8 inactive';
+```
+
+## 4. Build and install the PDO/OCI PHP Extension
 
 The `pdo_oci` library is outdated, so its install is more tricky.
 
-1. Fix paths:
+Download `pdo_oci` via `pecl`:
 
-    ```sh
-    $ cd /usr/include/
-    $ ln -s php5 php
-    $ cd /opt/oracle/instantclient
-    $ mkdir -p include/oracle/11.1/
-    $ cd include/oracle/11.1/
-    $ ln -s ../../../sdk/include client
-    $ cd -
-    $ mkdir -p lib/oracle/11.1/client
-    $ cd lib/oracle/11.1/client
-    $ ln -s ../../../../ lib
-    $ cd -
-    ```
+```sh
+$ pecl channel-update pear.php.net
+$ cd /tmp
+$ pecl download pdo_oci
+```
 
-2. Download `pdo_oci` via `pecl`:
+Extract source:
 
-    ```sh
-    $ pecl channel-update pear.php.net
-    $ mkdir -p /tmp/pear/download/
-    $ cd /tmp/pear/download/
-    $ pecl download pdo_oci
-    ```
+```sh
+$ tar xvf PDO_OCI-1.0.tgz -C /tmp
+$ cd PDO_OCI-1.0
+```
 
-3. Extract source:
+Patch `config.m4` to replace Instant Client 10.1 with 12.1;
 
-    ```sh
-    $ tar xvf PDO_OCI*.tgz
-    $ cd PDO_OCI*
-    ```
+```sh
+$ sed 's/10.1/12.1/' -i /tmp/PDO_OCI-1.0/config.m4
+```
 
-4. Create a file named `config.m4.patch`:
+Replace all references of `function_entry` to `zend_function_entry` in `pdo_oci.c`:
 
-    ```
-    *** config.m4	2005-09-24 17:23:24.000000000 -0600
-    --- /home/myuser/Desktop/PDO_OCI-1.0/config.m4	2009-07-07 17:32:14.000000000 -0600
-    ***************
-    *** 7,12 ****
-    --- 7,14 ----
-        if test -s "$PDO_OCI_DIR/orainst/unix.rgs"; then
-          PDO_OCI_VERSION=`grep '"ocommon"' $PDO_OCI_DIR/orainst/unix.rgs | sed 's/[ ][ ]*/:/g' | cut -d: -f 6 | cut -c 2-4`
-          test -z "$PDO_OCI_VERSION" && PDO_OCI_VERSION=7.3
-    +   elif test -f $PDO_OCI_DIR/lib/libclntsh.$SHLIB_SUFFIX_NAME.11.1; then
-    +     PDO_OCI_VERSION=11.1
-        elif test -f $PDO_OCI_DIR/lib/libclntsh.$SHLIB_SUFFIX_NAME.10.1; then
-          PDO_OCI_VERSION=10.1
-        elif test -f $PDO_OCI_DIR/lib/libclntsh.$SHLIB_SUFFIX_NAME.9.0; then
-    ***************
-    *** 119,124 ****
-    --- 121,129 ----
-          10.2)
-            PHP_ADD_LIBRARY(clntsh, 1, PDO_OCI_SHARED_LIBADD)
-            ;;
-    +     11.1)
-    +       PHP_ADD_LIBRARY(clntsh, 1, PDO_OCI_SHARED_LIBADD)
-    +       ;;
-          *)
-            AC_MSG_ERROR(Unsupported Oracle version! $PDO_OCI_VERSION)
-            ;;
-    #EOF
-    ```
+```sh
+$ sed 's/function_entry/zend_function_entry/' -i /tmp/PDO_OCI-1.0/pdo_oci.c
+```
 
-5. Apply patch:
+Prepare and build:
 
-    ``` sh
-    $ patch --dry-run -i config.m4.patch && patch -i config.m4.patch && phpize
-    ```
+```sh
+$ phpize
+$ ./configure --with-pdo-oci=/opt/oracle/instantclient
+$ make install
+```
 
-6. Replace all references of `function_entry` to `zend_function_entry` in `pdo_oci.c`.
+* Ubuntu 12.04 (Precise) / PHP 5.3.10:
 
-7. Configure, compile and install:
+    Create file `/etc/php5/conf.d/pdo_oci.ini` containing just one line:
 
-    ``` sh
-    $ ORACLE_HOME=/opt/oracle/instantclient ./configure --with-pdo-oci=instantclient,/opt/oracle/instantclient,11.1
-    $ make && make test && make install && mv modules/pdo_oci.so /usr/lib/php5/*+lfs/
-    ```
-
-8. Save this text in `/etc/php5/mods-available/pdo_oci.ini`:
-
-    ``` ini
+    ```ini
     extension=pdo_oci.so
     ```
 
-9. Activate extension:
+* Ubuntu 14.04 (Trusty) / PHP 5.5.9:
+
+    Create file `/etc/php5/mods-available/pdo_oci.ini` containing just one line:
+
+    ```ini
+    extension=pdo_oci.so
+    ```
+
+    Link it to activate on PHP CLI (command line interface):
 
     ```sh
-    $ php5enmod pdo_oci
+    $ ln -s ../../mods-available/pdo_oci.ini /etc/php5/cli/conf.d/20-pdo_oci.ini
+    ```
+
+    If you have an Apache setup:
+
+    ```sh
+    $ ln -s ../../mods-available/pdo_oci.ini /etc/php5/apache2/conf.d/20-pdo_oci.ini
     ```
 
 And now you can take a cup of coffee.

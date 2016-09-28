@@ -51,4 +51,3 @@ CMD php /tmp/connection-test.php
 
 # Add command to get compiled extensions
 ADD get-extension /bin/get-extension
-
