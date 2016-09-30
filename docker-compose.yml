@@ -16,3 +16,9 @@ services:
       - .:/host
     depends_on:
       - database
+  xenial:
+    build: xenial/
+    volumes:
+      - .:/host
+    depends_on:
+      - database

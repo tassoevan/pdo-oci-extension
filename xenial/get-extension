@@ -1,0 +1,6 @@
+#!/bin/bash
+
+cp /usr/lib/php/20151012/oci8.so /host/oci8.so
+chown `stat -c '%u:%g' /host` /host/oci8.so
+cp /usr/lib/php/20151012/pdo_oci.so /host/pdo_oci.so
+chown `stat -c '%u:%g' /host` /host/pdo_oci.so
