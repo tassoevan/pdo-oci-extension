@@ -1,50 +1,39 @@
 version: '3'
 services:
-  #database:
-  #  image: wnameless/oracle-xe-11g
-  #  ports:
-  #    - "49160:22"
-  #precise:
-  #  build: precise/
-  #  volumes:
-  #    - .:/host
-  #  depends_on:
-  #    - database
-  #trusty:
-  #  build: trusty/
-  #  volumes:
-  #    - .:/host
-  #  depends_on:
-  #    - database
-  #xenial:
-  #  build: xenial/
-  #  volumes:
-  #    - .:/host
-  #  depends_on:
-  #    - database
+  database:
+    image: wnameless/oracle-xe-11g
+    ports:
+      - "49160:22"
   precise:
     build:
-      context: ./common
+      context: ./docker-image
       args:
         ubuntu_version: precise
         php_packages: php5 php5-cli php5-dev php-db php-pear
         oci8_pecl_version: oci8-2.0.12
-        oci8_ini_path: /etc/php5/conf.d/oci8.ini
+    volumes:
+      - ./build/precise:/host
+    depends_on:
+      - database
   trusty:
     build:
-      context: ./common
+      context: ./docker-image
       args:
         ubuntu_version: trusty
         php_packages: php5 php5-cli php5-dev php-db php-pear
         oci8_pecl_version: oci8-2.0.12
-        oci8_ini_path: /etc/php5/mods-available/oci8.ini
-        oci8_enmod_cmd: ln -s ../../mods-available/oci8.ini /etc/php5/cli/conf.d/20-oci8.ini
+    volumes:
+      - ./build/trusty:/host
+    depends_on:
+      - database
   xenial:
     build:
-      context: ./common
+      context: ./docker-image
       args:
         ubuntu_version: xenial
         php_packages: php7.0 php7.0-cli php7.0-dev
         oci8_pecl_version: oci8-2.1.2
-        oci8_ini_path: /etc/php/7.0/mods-available/oci8.ini
-        oci8_enmod_cmd: phpenmod oci8
+    volumes:
+      - ./build/xenial:/host
+    depends_on:
+      - database
