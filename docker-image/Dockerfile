@@ -12,14 +12,14 @@ RUN apt-get update && \
     apt-get install -y unzip build-essential libaio1 re2c wget
 
 # Install Oracle Instant Client Basic and SDK
-ADD instantclient/instantclient-basic-linux.x64-12.1.0.2.0.zip /tmp/basic.zip
-ADD instantclient/instantclient-sdk-linux.x64-12.1.0.2.0.zip /tmp/sdk.zip
+ADD instantclient/instantclient-basic-linux.x64-12.2.0.1.0.zip /tmp/basic.zip
+ADD instantclient/instantclient-sdk-linux.x64-12.2.0.1.0.zip /tmp/sdk.zip
 
 RUN mkdir -p /opt/oracle/instantclient && \
     unzip -q /tmp/basic.zip -d /opt/oracle && \
-    mv /opt/oracle/instantclient_12_1 /opt/oracle/instantclient/lib && \
+    mv /opt/oracle/instantclient_12_2 /opt/oracle/instantclient/lib && \
     unzip -q /tmp/sdk.zip -d /opt/oracle && \
-    mv /opt/oracle/instantclient_12_1/sdk/include /opt/oracle/instantclient/include && \
+    mv /opt/oracle/instantclient_12_2/sdk/include /opt/oracle/instantclient/include && \
     ln -s /opt/oracle/instantclient/lib/libclntsh.so.12.1 /opt/oracle/instantclient/lib/libclntsh.so && \
     ln -s /opt/oracle/instantclient/lib/libocci.so.12.1 /opt/oracle/instantclient/lib/libocci.so && \
     echo /opt/oracle/instantclient/lib >> /etc/ld.so.conf && \
