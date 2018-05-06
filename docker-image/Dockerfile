@@ -10,8 +10,7 @@ LABEL maintainer="Tasso Evangelista <tasso@tassoevan.me>"
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update && \
-    apt-get install -y unzip build-essential libaio1 re2c wget ${php_packages} && \
-    ln -s /usr/include/php5 /usr/include/php
+    apt-get install -y unzip build-essential libaio1 re2c wget ${php_packages}
 
 # Install Oracle Instant Client Basic and SDK
 ADD instantclient/instantclient-basic-linux.x64-12.1.0.2.0.zip /tmp/basic.zip

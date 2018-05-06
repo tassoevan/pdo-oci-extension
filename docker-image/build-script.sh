@@ -12,12 +12,20 @@ oci8_trusty() {
 }
 
 oci8_xenial() {
-  echo 'instantclient,/opt/oracle/instantclient/lib' | pecl install oci8-2.1.2
+  echo 'instantclient,/opt/oracle/instantclient/lib' | pecl install oci8-2.1.8
   echo 'extension=oci8.so' > /etc/php/7.0/mods-available/oci8.ini
   phpenmod oci8
 }
 
+oci8_bionic() {
+  echo 'instantclient,/opt/oracle/instantclient/lib' | pecl install oci8-2.1.8
+  echo 'extension=oci8.so' > /etc/php/7.2/mods-available/oci8.ini
+  phpenmod oci8
+}
+
 pdo_oci_precise() {
+  ln -s /usr/include/php5 /usr/include/php
+
   pecl channel-update pear.php.net
   cd /tmp
   pecl download pdo_oci
@@ -32,6 +40,8 @@ pdo_oci_precise() {
 }
 
 pdo_oci_trusty() {
+  ln -s /usr/include/php5 /usr/include/php
+
   pecl channel-update pear.php.net
   cd /tmp
   pecl download pdo_oci
@@ -47,13 +57,26 @@ pdo_oci_trusty() {
 }
 
 pdo_oci_xenial() {
-  wget -O /tmp/php-7.0.11.zip https://github.com/php/php-src/archive/php-7.0.11.zip
-  unzip /tmp/php-7.0.11.zip -d /tmp
-  cd /tmp/php-src-php-7.0.11/ext/pdo_oci
+  local php_version=7.0.30
+  wget -O /tmp/php-${php_version}.zip https://github.com/php/php-src/archive/php-${php_version}.zip
+  unzip /tmp/php-${php_version}.zip -d /tmp
+  cd /tmp/php-src-php-${php_version}/ext/pdo_oci
   phpize
   ./configure --with-pdo-oci=/opt/oracle/instantclient
   make install
   echo 'extension=pdo_oci.so'  > /etc/php/7.0/mods-available/pdo_oci.ini
+  phpenmod pdo_oci
+}
+
+pdo_oci_bionic() {
+  local php_version=7.2.5
+  wget -O /tmp/php-${php_version}.zip https://github.com/php/php-src/archive/php-${php_version}.zip
+  unzip /tmp/php-${php_version}.zip -d /tmp
+  cd /tmp/php-src-php-${php_version}/ext/pdo_oci
+  phpize
+  ./configure --with-pdo-oci=/opt/oracle/instantclient
+  make install
+  echo 'extension=pdo_oci.so'  > /etc/php/7.2/mods-available/pdo_oci.ini
   phpenmod pdo_oci
 }
 
@@ -81,6 +104,15 @@ cmd_xenial() {
   cp /usr/lib/php/20151012/oci8.so /host/oci8.so
   chown `stat -c '%u:%g' /host` /host/oci8.so
   cp /usr/lib/php/20151012/pdo_oci.so /host/pdo_oci.so
+  chown `stat -c '%u:%g' /host` /host/pdo_oci.so
+}
+
+cmd_bionic() {
+  php /tmp/connection-test.php
+
+  cp /usr/lib/php/20170718/oci8.so /host/oci8.so
+  chown `stat -c '%u:%g' /host` /host/oci8.so
+  cp /usr/lib/php/20170718/pdo_oci.so /host/pdo_oci.so
   chown `stat -c '%u:%g' /host` /host/pdo_oci.so
 }
 
