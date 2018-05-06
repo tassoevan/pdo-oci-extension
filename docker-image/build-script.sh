@@ -1,5 +1,25 @@
 #!/bin/bash
 
+php_precise() {
+  apt-get update
+  apt-get install -y php5 php5-cli php5-dev php-db php-pear
+}
+
+php_trusty() {
+  apt-get update
+  apt-get install -y php5 php5-cli php5-dev php-db php-pear
+}
+
+php_xenial() {
+  apt-get update
+  apt-get install -y php7.0 php7.0-cli php7.0-dev
+}
+
+php_bionic() {
+  apt-get update
+  apt-get install -y php7.2 php7.2-cli php7.2-dev
+}
+
 oci8_precise() {
   echo 'instantclient,/opt/oracle/instantclient/lib' | pecl install oci8-2.0.12
   echo 'extension=oci8.so' > /etc/php5/conf.d/oci8.ini
@@ -81,38 +101,30 @@ pdo_oci_bionic() {
 }
 
 cmd_precise() {
-  php /tmp/connection-test.php
-
   cp /usr/lib/php5/20090626/oci8.so /host/oci8.so
-  chown `stat -c '%u:%g' /host` /host/oci8.so
   cp /usr/lib/php5/20090626/pdo_oci.so /host/pdo_oci.so
+  chown `stat -c '%u:%g' /host` /host/oci8.so
   chown `stat -c '%u:%g' /host` /host/pdo_oci.so
 }
 
 cmd_trusty() {
-  php /tmp/connection-test.php
-
   cp /usr/lib/php5/20121212/oci8.so /host/oci8.so
-  chown `stat -c '%u:%g' /host` /host/oci8.so
   cp /usr/lib/php5/20121212/pdo_oci.so /host/pdo_oci.so
+  chown `stat -c '%u:%g' /host` /host/oci8.so
   chown `stat -c '%u:%g' /host` /host/pdo_oci.so
 }
 
 cmd_xenial() {
-  php /tmp/connection-test.php
-
   cp /usr/lib/php/20151012/oci8.so /host/oci8.so
-  chown `stat -c '%u:%g' /host` /host/oci8.so
   cp /usr/lib/php/20151012/pdo_oci.so /host/pdo_oci.so
+  chown `stat -c '%u:%g' /host` /host/oci8.so
   chown `stat -c '%u:%g' /host` /host/pdo_oci.so
 }
 
 cmd_bionic() {
-  php /tmp/connection-test.php
-
   cp /usr/lib/php/20170718/oci8.so /host/oci8.so
-  chown `stat -c '%u:%g' /host` /host/oci8.so
   cp /usr/lib/php/20170718/pdo_oci.so /host/pdo_oci.so
+  chown `stat -c '%u:%g' /host` /host/oci8.so
   chown `stat -c '%u:%g' /host` /host/pdo_oci.so
 }
 

@@ -2,7 +2,6 @@ ARG ubuntu_version
 FROM ubuntu:${ubuntu_version}
 
 ARG ubuntu_version
-ARG php_packages
 
 LABEL maintainer="Tasso Evangelista <tasso@tassoevan.me>"
 
@@ -10,7 +9,7 @@ LABEL maintainer="Tasso Evangelista <tasso@tassoevan.me>"
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update && \
-    apt-get install -y unzip build-essential libaio1 re2c wget ${php_packages}
+    apt-get install -y unzip build-essential libaio1 re2c wget
 
 # Install Oracle Instant Client Basic and SDK
 ADD instantclient/instantclient-basic-linux.x64-12.1.0.2.0.zip /tmp/basic.zip
@@ -28,18 +27,22 @@ RUN mkdir -p /opt/oracle/instantclient && \
 
 # Add scripts
 ADD build-script.sh /tmp/build-script.sh
-ADD oci8-test.php /tmp/oci8-test.php
-ADD pdo_oci-test.php /tmp/pdo_oci-test.php
-ADD connection-test.php /tmp/connection-test.php
+ADD tests/oci8.php /tmp/oci8.php
+ADD tests/pdo_oci.php /tmp/pdo_oci.php
+ADD tests/connection.php /tmp/connection.php
+
+# Install PHP development packages
+RUN /tmp/build-script.sh php ${ubuntu_version}
 
 # Build and install PHP OCI8 extension
 RUN /tmp/build-script.sh oci8 ${ubuntu_version}
-RUN php /tmp/oci8-test.php
+RUN php /tmp/oci8.php
 
 # Build and install PHP PDO-OCI extension
 RUN /tmp/build-script.sh pdo_oci ${ubuntu_version}
-RUN php /tmp/pdo_oci-test.php
+RUN php /tmp/pdo_oci.php
 
 # Setup runtime
 ENV ubuntu_version=${ubuntu_version}
-CMD /tmp/build-script.sh cmd ${ubuntu_version}
+CMD /usr/bin/php /tmp/connection.php && \
+    /tmp/build-script.sh cmd ${ubuntu_version}
