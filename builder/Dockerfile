@@ -18,7 +18,7 @@ RUN apt-get update && \
 # Install PHP and PHP development packages
 RUN apt-get update && \
     apt-get install -y ${php_packages}
-RUN test `php -r 'echo substr(PHP_VERSION, 0, strpos(PHP_VERSION, "-"));'` = "${php_version}"
+RUN php -r 'exit(substr(PHP_VERSION, 0, strlen(getenv("php_version"))) === getenv("php_version") ? 0 : 1);'
 
 # Install Oracle Instant Client Basic and SDK
 RUN mkdir -p /opt/oracle/instantclient
