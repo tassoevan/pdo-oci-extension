@@ -9,9 +9,10 @@ ARG oci8_version
 
 LABEL maintainer="Tasso Evangelista <tasso@tassoevan.me>"
 
-# Install build dependencies
+VOLUME /host
 ENV DEBIAN_FRONTEND noninteractive
 
+# Install build dependencies
 RUN apt-get update && \
     apt-get install -y unzip build-essential libaio1 re2c wget ca-certificates
 
@@ -64,8 +65,7 @@ RUN if [ "${ubuntu_version}" = 'trusty' ]; \
     fi
 RUN php -r 'exit(in_array("oci", PDO::getAvailableDrivers()) ? 0 : 1);'
 
-# Setup runtime
-VOLUME /host
+# Copy compiled binaries to volume
 CMD ext_dir=`php -r 'echo ini_get("extension_dir");'` && \
     host_owner=`stat -c '%u:%g' /host` && \
     cp "${ext_dir}/oci8.so" /host/oci8.so && \
