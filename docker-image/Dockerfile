@@ -15,6 +15,11 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && \
     apt-get install -y unzip build-essential libaio1 re2c wget ca-certificates
 
+# Install PHP and PHP development packages
+RUN apt-get update && \
+    apt-get install -y ${php_packages}
+RUN test `php -r 'echo substr(PHP_VERSION, 0, strpos(PHP_VERSION, "-"));'` = "${php_version}"
+
 # Install Oracle Instant Client Basic and SDK
 RUN mkdir -p /opt/oracle/instantclient
 ADD instantclient/instantclient-basic-linux.x64-12.2.0.1.0.zip /tmp/basic.zip
@@ -27,11 +32,6 @@ RUN ln -s /opt/oracle/instantclient/lib/libclntsh.so.12.1 /opt/oracle/instantcli
 RUN ln -s /opt/oracle/instantclient/lib/libocci.so.12.1 /opt/oracle/instantclient/lib/libocci.so
 RUN echo /opt/oracle/instantclient/lib >> /etc/ld.so.conf
 RUN ldconfig
-
-# Install PHP and PHP development packages
-RUN apt-get update && \
-    apt-get install -y ${php_packages}
-RUN test `php -r 'echo substr(PHP_VERSION, 0, strpos(PHP_VERSION, "-"));'` = "${php_version}"
 
 # Build and install PHP OCI8 extension
 RUN echo 'instantclient,/opt/oracle/instantclient/lib' | pecl install oci8-${oci8_version}
