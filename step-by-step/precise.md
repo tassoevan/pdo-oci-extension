@@ -136,7 +136,7 @@ Now the PDO OCI driver is compiled and installed, but disabled. To enable it, cr
 containing just one line:
 
 ```ini
-extension=oci8.so
+extension=pdo_oci.so
 ```
 
 Now `oci` DSN prefix is available in PDO. Confirm it using running:
