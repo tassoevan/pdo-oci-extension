@@ -6,7 +6,7 @@ services:
       - "49160:22"
   precise:
     build:
-      context: ./docker-image
+      context: ./builder
       args:
         ubuntu_version: precise
         php_version: 5.3.10
@@ -19,7 +19,7 @@ services:
       - database
   trusty:
     build:
-      context: ./docker-image
+      context: ./builder
       args:
         ubuntu_version: trusty
         php_version: 5.5.9
@@ -32,7 +32,7 @@ services:
       - database
   xenial:
     build:
-      context: ./docker-image
+      context: ./builder
       args:
         ubuntu_version: xenial
         php_version: 7.0.30
@@ -45,7 +45,7 @@ services:
       - database
   bionic:
     build:
-      context: ./docker-image
+      context: ./builder
       args:
         ubuntu_version: bionic
         php_version: 7.2.5
