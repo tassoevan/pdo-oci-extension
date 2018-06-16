@@ -1,9 +1,5 @@
 version: '3'
 services:
-  database:
-    image: wnameless/oracle-xe-11g
-    ports:
-      - "49160:22"
   precise:
     build:
       context: ./builder
@@ -15,8 +11,7 @@ services:
         oci8_version: 2.0.12
     volumes:
       - ./build/precise:/host
-    depends_on:
-      - database
+
   trusty:
     build:
       context: ./builder
@@ -28,8 +23,7 @@ services:
         oci8_version: 2.0.12
     volumes:
       - ./build/trusty:/host
-    depends_on:
-      - database
+
   xenial:
     build:
       context: ./builder
@@ -41,8 +35,7 @@ services:
         oci8_version: 2.1.8
     volumes:
       - ./build/xenial:/host
-    depends_on:
-      - database
+
   bionic:
     build:
       context: ./builder
@@ -54,5 +47,3 @@ services:
         oci8_version: 2.1.8
     volumes:
       - ./build/bionic:/host
-    depends_on:
-      - database

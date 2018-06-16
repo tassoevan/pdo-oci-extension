@@ -66,9 +66,7 @@ RUN php -r 'exit(in_array("oci", PDO::getAvailableDrivers()) ? 0 : 1);'
 
 # Setup runtime
 VOLUME /host
-ADD tests.php /tmp/tests.php
-CMD /usr/bin/php /tmp/tests.php && \
-    ext_dir=`php -r 'echo ini_get("extension_dir");'` && \
+CMD ext_dir=`php -r 'echo ini_get("extension_dir");'` && \
     host_owner=`stat -c '%u:%g' /host` && \
     cp "${ext_dir}/oci8.so" /host/oci8.so && \
     chown ${host_owner} /host/oci8.so && \
