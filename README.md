@@ -29,3 +29,9 @@ There are instructions for build and install the extensions using the server
 * Ubuntu 14.04 (Trusty Tahr), PHP 5.5.9
   - [Step by step](step-by-step/trusty.md)
   - [Using Docker](using-docker/trusty.md)
+* Ubuntu 16.04 (Xenial Xerus), PHP 7.0.30
+  - [Step by step](step-by-step/xenial.md)
+  - [Using Docker](using-docker/xenial.md)
+* Ubuntu 18.04 (Bionic Beaver), PHP 7.2.5
+  - [Step by step](step-by-step/bionic.md)
+  - [Using Docker](using-docker/bionic.md)
